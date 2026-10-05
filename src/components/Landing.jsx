@@ -30,10 +30,10 @@ const Landing = ({ onStart, isLibReady }) => {
         />
         <div className="relative z-10 flex flex-col items-center">
           <ShinyText text="Flowgen" className="text-[clamp(4rem,15vw,18rem)] font-black tracking-tighter drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]" />
-          <motion.div animate={{ y: [0, 10, 0] }} transition={{ repeat: Infinity, duration: 2 }} className="mt-10 flex flex-col items-center gap-2 text-white/40">
+          <div className="mt-10 flex flex-col items-center gap-2 text-white/40 animate-bounce" style={{ animationDuration: '2.5s' }}>
             <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Scroll to Discover</span>
             <ArrowRight className="rotate-90" size={16} />
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -86,7 +86,6 @@ const Landing = ({ onStart, isLibReady }) => {
         {/* SECTION 3 / FOOTER: NO DEAD SCROLL */}
         <div className="mt-32 w-full flex flex-col items-center text-center px-6 z-10 opacity-70">
           <h4 className="text-white/30 text-[10px] font-black uppercase tracking-[0.6em] mb-4">Flowgen Terminal</h4>
-          <p className="text-white/10 text-xs font-medium max-w-sm">Ready to initialize high-fidelity creative output sequence.</p>
         </div>
       </section>
 

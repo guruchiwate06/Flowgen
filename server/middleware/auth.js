@@ -2,7 +2,9 @@ import admin from 'firebase-admin';
 
 // Initialize Firebase Admin only once
 if (!admin.apps.length) {
-  admin.initializeApp();
+  admin.initializeApp({
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT,
+  });
 }
 
 export const authMiddleware = async (req, res, next) => {

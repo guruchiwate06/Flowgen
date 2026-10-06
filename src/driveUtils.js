@@ -40,37 +40,53 @@ export const getOrCreateFolder = async (folderName, accessToken) => {
   return newData.id;
 };
 
-export const uploadToDrive = async (file, accessToken, folderId = null) => {
-  const metadata = {
-    name: file.name,
-    mimeType: file.type
-  };
-  
-  if (folderId) {
-    metadata.parents = [folderId];
-  }
-
-  const form = new FormData();
-  form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
-  form.append("file", file);
-
-  const res = await fetch(
-    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,thumbnailLink,webContentLink,iconLink",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      },
-      body: form
+export const uploadToDrive = (file, accessToken, folderId = null, onProgress = null) => {
+  return new Promise((resolve, reject) => {
+    const metadata = {
+      name: file.name,
+      mimeType: file.type
+    };
+    
+    if (folderId) {
+      metadata.parents = [folderId];
     }
-  );
 
-  if (!res.ok) {
-    if (res.status === 401) throw new Error("SESSION_EXPIRED");
-    throw new Error("Upload failed");
-  }
+    const form = new FormData();
+    form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+    form.append("file", file);
 
-  return await res.json(); // contains fileId
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,thumbnailLink,webContentLink,iconLink");
+    xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+
+    if (xhr.upload && onProgress) {
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          onProgress(percent, event.loaded, event.total);
+        }
+      };
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText));
+        } catch (e) {
+          reject(new Error("Failed to parse upload response"));
+        }
+      } else {
+        if (xhr.status === 401) {
+          reject(new Error("SESSION_EXPIRED"));
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+      }
+    };
+
+    xhr.onerror = () => reject(new Error("Network error during file upload"));
+    xhr.send(form);
+  });
 };
 
 export const fetchDriveFile = async (fileId, accessToken) => {

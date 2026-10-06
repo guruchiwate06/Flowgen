@@ -136,7 +136,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [driveToken, setDriveToken] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState({ active: false, current: 0, total: 0, fileName: '' });
+  const [uploadProgress, setUploadProgress] = useState({ active: false, current: 0, total: 0, percent: 0, fileName: '' });
   const [downloading, setDownloading] = useState(false);
   const [saveStatus, setSaveStatus] = useState("idle");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -348,7 +348,7 @@ export default function App() {
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        setUploadProgress(prev => ({ ...prev, current: i + 1, fileName: file.name }));
+        setUploadProgress(prev => ({ ...prev, current: i + 1, fileName: file.name, percent: 0 }));
         
         if (file.size > 500 * 1024 * 1024) {
           showToast(`File ${file.name} is too large (> 500MB). Skipping.`);
@@ -357,7 +357,9 @@ export default function App() {
         }
 
         try {
-          const res = await uploadToDrive(file, driveToken, folderId);
+          const res = await uploadToDrive(file, driveToken, folderId, (percent) => {
+            setUploadProgress(prev => ({ ...prev, percent }));
+          });
 
           uploadedAssets.push({
             id: res.id,
@@ -401,7 +403,7 @@ export default function App() {
         showToast("Upload flow completely failed");
       }
     } finally {
-      setUploadProgress({ active: false, current: 0, total: 0, fileName: '' });
+      setUploadProgress({ active: false, current: 0, total: 0, percent: 0, fileName: '' });
       e.target.value = ''; // Reset input to allow re-upload of same file
     }
   };

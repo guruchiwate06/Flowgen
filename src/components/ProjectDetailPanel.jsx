@@ -512,19 +512,39 @@ export default function DetailPanel({ project, onClose, onChange, onDelete, onRe
               </div>
 
               {driveToken ? (
-                <label className={`flex items-center gap-3 p-3 rounded-[18px] bg-white/[0.025] border border-dashed border-white/10 hover:border-violet-500/40 hover:bg-violet-500/5 cursor-pointer group transition-all mb-5 ${uploadProgress.active ? 'opacity-50 pointer-events-none' : ''}`}>
+                <label className={`flex flex-col gap-2 p-3.5 rounded-[18px] bg-white/[0.025] border border-dashed border-white/10 hover:border-violet-500/40 hover:bg-violet-500/5 cursor-pointer group transition-all mb-5 ${uploadProgress.active ? 'pointer-events-none border-violet-500/40 bg-violet-500/[0.03]' : ''}`}>
                   <input type="file" className="hidden" accept="image/*,video/*" onChange={onFileUpload} multiple disabled={uploadProgress.active} />
-                  <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-violet-500/10 transition-colors shrink-0">
-                    <Upload size={15} className="text-slate-500 group-hover:text-violet-400 transition-colors" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-violet-500/10 transition-colors shrink-0">
+                      <Upload size={15} className={`text-slate-500 group-hover:text-violet-400 transition-colors ${uploadProgress.active ? 'text-violet-400 animate-pulse' : ''}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-black text-slate-300 group-hover:text-white transition-colors truncate">
+                          {uploadProgress.active 
+                            ? `Uploading ${uploadProgress.current} of ${uploadProgress.total}` 
+                            : "Upload Clips"}
+                        </p>
+                        {uploadProgress.active && (
+                          <span className="text-[11px] font-black text-violet-400 font-mono">
+                            {uploadProgress.percent ?? 0}%
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5 truncate">
+                        {uploadProgress.active ? uploadProgress.fileName : "Images · Videos · Multiple"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-slate-400 group-hover:text-white transition-colors truncate">
-                      {uploadProgress.active ? `Uploading ${uploadProgress.current} of ${uploadProgress.total}` : "Upload Clips"}
-                    </p>
-                    <p className="text-[9px] text-slate-600 uppercase tracking-widest mt-0.5 truncate">
-                      {uploadProgress.active ? uploadProgress.fileName : "Images · Videos · Multiple"}
-                    </p>
-                  </div>
+
+                  {uploadProgress.active && (
+                    <div className="w-full bg-white/5 rounded-full h-1.5 overflow-hidden mt-1">
+                      <div 
+                        className="bg-gradient-to-r from-violet-500 to-fuchsia-500 h-full rounded-full transition-all duration-150 ease-out"
+                        style={{ width: `${Math.max(4, uploadProgress.percent ?? 0)}%` }}
+                      />
+                    </div>
+                  )}
                 </label>
               ) : (
                 <button onClick={onConnectDrive} className="w-full mb-5 flex items-center gap-3 p-3 rounded-[18px] bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/20 transition-all text-left">

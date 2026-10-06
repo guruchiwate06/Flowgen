@@ -1,5 +1,5 @@
-import React from 'react';
-import { Clock, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Clock, ChevronRight, Image as ImageIcon, Video, Clapperboard, Camera } from 'lucide-react';
 import { STATUS_CONFIG, timeAgo } from '../constants';
 
 const TOTAL_STAGES = 5;
@@ -25,6 +25,7 @@ const ProjectCard = React.forwardRef(
     },
     ref
   ) => {
+    const [imgError, setImgError] = useState(false);
     const status = STATUS_CONFIG[project.status];
     const progress = (status.step / TOTAL_STAGES) * 100;
 
@@ -50,17 +51,34 @@ const ProjectCard = React.forwardRef(
         ].join(' ')}
       >
         {/* Thumbnail */}
-        <div className="aspect-[16/10] relative overflow-hidden bg-slate-900/50 flex-shrink-0">
-          {project.thumbnail ? (
+        <div className="aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-[#18181c] to-[#0d0d10] flex-shrink-0">
+          {project.thumbnail && !imgError ? (
             <img
               src={project.thumbnail}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               alt={project.title}
               draggable={false}
+              onError={() => setImgError(true)}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-white/5 bg-gradient-to-br from-white/5 to-transparent">
-              <ImageIcon size={48} />
+            <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden group/thumb">
+              {/* Subtle background glow */}
+              <div 
+                className="absolute inset-0 opacity-15 blur-2xl transition-opacity group-hover:opacity-30"
+                style={{ backgroundColor: status.color }}
+              />
+              <div className="w-12 h-12 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-white/40 group-hover:text-violet-400 group-hover:scale-110 transition-all shadow-inner">
+                {project.type?.toLowerCase().includes('tiktok') || project.type?.toLowerCase().includes('reel') ? (
+                  <Clapperboard size={22} />
+                ) : project.type?.toLowerCase().includes('youtube') || project.type?.toLowerCase().includes('video') ? (
+                  <Video size={22} />
+                ) : (
+                  <Camera size={22} />
+                )}
+              </div>
+              <span className="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500 mt-2">
+                {project.type || 'Media'}
+              </span>
             </div>
           )}
           {/* Status badge */}

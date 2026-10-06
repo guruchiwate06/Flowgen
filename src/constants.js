@@ -16,13 +16,7 @@ export const CLIP_ROLES = {
 
 export const ROLE_ORDER = ['hook', 'body', 'ending', 'optional', 'unassigned'];
 
-const _now = Date.now();
-export const INITIAL_DATA = [
-  { id: 1, title: 'The Future of Minimalism', status: 'EDITING', type: 'YouTube Video', createdAt: _now - 7 * 86400000, lastEdited: _now - 2 * 3600000, thumbnail: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?q=80&w=800', caption: 'Exploring minimalism in digital products.', hashtags: ['minimalism', 'design', 'youtube'], assets: [] },
-  { id: 2, title: 'Studio Setup Tour', status: 'READY', type: 'Instagram Reel', createdAt: _now - 5 * 86400000, lastEdited: _now - 5 * 3600000, thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=800', caption: 'New workspace walkthrough.', hashtags: ['studio', 'setup'], assets: [] },
-  { id: 3, title: 'Productivity Hacks', status: 'IDEA', type: 'Newsletter', createdAt: _now - 3 * 86400000, lastEdited: _now - 24 * 3600000, thumbnail: null, caption: 'Systems for solo creators.', hashtags: ['productivity', 'creator'], assets: [] },
-  { id: 4, title: 'Morning Routine 2024', status: 'SHOOTING', type: 'TikTok', createdAt: _now - 10 * 86400000, lastEdited: _now - 3 * 24 * 3600000, thumbnail: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1000&auto=format&fit=crop', caption: 'Maximize the first hour of your day.', hashtags: ['morning', 'routine', 'tiktok'], assets: [] }
-];
+export const INITIAL_DATA = [];
 
 /* ─── Safe localStorage helpers ────────────────────────────────────────────── */
 export const STORAGE_KEYS = {

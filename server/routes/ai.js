@@ -6,9 +6,9 @@ import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 
 const router = express.Router();
 
-// Apply middleware
-router.use(rateLimitMiddleware);
+// Apply middleware: auth first so rate limiter can track by user ID, falling back to IP
 router.use(authMiddleware);
+router.use(rateLimitMiddleware);
 
 router.post('/caption', async (req, res) => {
   try {

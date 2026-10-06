@@ -1,25 +1,29 @@
-// Basic in-memory rate limiting for demonstration
+// Rate limiting: 5 requests per 48 hours per user
 const requestCounts = new Map();
-const LIMIT = 100;
-const WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+const LIMIT = 5;
+const WINDOW_MS = 48 * 60 * 60 * 1000; // 48 hours
 
 export const rateLimitMiddleware = (req, res, next) => {
-  const ip = req.ip || req.connection.remoteAddress;
+  // Identify by authenticated user ID if available, otherwise client IP
+  const identifier = req.user?.uid || req.user?.user_id || req.user?.sub || req.ip || req.connection?.remoteAddress || 'anonymous';
   const now = Date.now();
   
-  if (!requestCounts.has(ip)) {
-    requestCounts.set(ip, { count: 1, resetTime: now + WINDOW_MS });
+  if (!requestCounts.has(identifier)) {
+    requestCounts.set(identifier, { count: 1, resetTime: now + WINDOW_MS });
     return next();
   }
 
-  const limitData = requestCounts.get(ip);
+  const limitData = requestCounts.get(identifier);
   if (now > limitData.resetTime) {
-    requestCounts.set(ip, { count: 1, resetTime: now + WINDOW_MS });
+    requestCounts.set(identifier, { count: 1, resetTime: now + WINDOW_MS });
     return next();
   }
 
   if (limitData.count >= LIMIT) {
-    return res.status(429).json({ error: 'Rate limit exceeded. Please try again tomorrow.' });
+    const hoursRemaining = Math.max(1, Math.ceil((limitData.resetTime - now) / (60 * 60 * 1000)));
+    return res.status(429).json({ 
+      error: `Limit reached: You have used your 5 free AI requests. Limit resets in ${hoursRemaining} hour(s).` 
+    });
   }
 
   limitData.count++;

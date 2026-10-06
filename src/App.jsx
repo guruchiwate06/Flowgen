@@ -196,7 +196,13 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Safety timer so authLoading never hangs indefinitely
+    const safetyTimer = setTimeout(() => {
+      setAuthLoading(false);
+    }, 2500);
+
     const unsub = onAuthStateChanged(auth, (u) => {
+      clearTimeout(safetyTimer);
       setUser(u);
       if (u) {
         loadProjectsFromFirestore(u.uid).finally(() => setAuthLoading(false));
@@ -206,7 +212,11 @@ export default function App() {
         setView(v => (v !== 'landing' ? 'auth' : v));
       }
     });
-    return unsub;
+
+    return () => {
+      clearTimeout(safetyTimer);
+      unsub();
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -507,8 +517,17 @@ export default function App() {
     triggerFirestoreSave(newItem);
   };
 
-  /* ─── Render ────────────────────────────────────────────────────────────── */
-  if (authLoading) return null;
+  /* ─── Render ─── */
+  if (authLoading) {
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#0A0A0B] text-white">
+        <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 animate-pulse">
+          <Layers size={24} className="text-violet-400" />
+        </div>
+        <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-500 animate-pulse">Loading Flowgen…</p>
+      </div>
+    );
+  }
 
   return (
     <div className={`flex flex-col bg-[#0A0A0B] text-slate-200 selection:bg-violet-500 selection:text-white ${

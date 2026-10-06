@@ -127,7 +127,7 @@ const AuthPage = ({ onSuccess, onBack }) => {
               transition={{ duration: 0.18 }}
             >
               <h2 className="text-xl font-black text-white tracking-tight mb-6">
-                {mode === 'login' ? 'Sign in' : 'Sign up'}
+                {mode === 'login' ? 'Log in' : 'Sign up'}
               </h2>
             </motion.div>
           </AnimatePresence>
@@ -180,7 +180,7 @@ const AuthPage = ({ onSuccess, onBack }) => {
             >
               {loading
                 ? <><Loader2 size={16} className="animate-spin" /> Please wait…</>
-                : <>{mode === 'login' ? 'Sign In' : 'Create Account'} <ArrowRight size={16} /></>
+                : <>{mode === 'login' ? 'Log In' : 'Sign Up'} <ArrowRight size={16} /></>
               }
             </motion.button>
           </form>
@@ -212,7 +212,7 @@ const AuthPage = ({ onSuccess, onBack }) => {
           <p className="text-center text-xs text-slate-500 mt-6 font-bold">
             {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
             <button onClick={toggle} className="text-violet-400 hover:text-violet-300 transition-colors underline underline-offset-2">
-              {mode === 'login' ? 'Sign up' : 'Sign in'}
+              {mode === 'login' ? 'Sign up' : 'Log in'}
             </button>
           </p>
         </div>

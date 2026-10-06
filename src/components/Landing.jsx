@@ -73,7 +73,7 @@ const Landing = ({ onStart, isLibReady }) => {
           </div>
           <div className="text-6xl md:text-8xl font-black text-white tracking-tighter mb-12 leading-[1.1] flex flex-wrap justify-center gap-x-4">
             {words.map((word, i) => (
-              <span key={i} className={`py-2 ${i > 2 ? "text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400" : ""}`}>
+              <span key={i} className={`inline-block py-2 ${i > 2 ? "text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400" : ""}`}>
                 {word}
               </span>
             ))}

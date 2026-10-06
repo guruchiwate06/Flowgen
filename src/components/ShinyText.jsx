@@ -13,7 +13,9 @@ const ShinyText = ({ text, color = '#ffffff', shineColor = '#ffffff', speed = 3.
     backgroundSize: '200% auto',
     WebkitBackgroundClip: 'text',
     backgroundClip: 'text',
-    WebkitTextFillColor: 'transparent'
+    WebkitTextFillColor: 'transparent',
+    color: 'transparent',
+    display: 'inline-block'
   };
   return <motion.span className={className} style={{ ...gradientStyle, backgroundPosition }}>{text}</motion.span>;
 };

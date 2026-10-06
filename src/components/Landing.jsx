@@ -28,11 +28,22 @@ const Landing = ({ onStart, isLibReady }) => {
           mouseInfluence={0.12}
           fadeDistance={1.4}
         />
-        <div className="relative z-10 flex flex-col items-center">
-          <ShinyText text="Flowgen" className="text-[clamp(4rem,15vw,18rem)] font-black tracking-tighter drop-shadow-[0_0_25px_rgba(255,255,255,0.4)]" />
-          <div className="mt-10 flex flex-col items-center gap-2 text-white/40 animate-bounce" style={{ animationDuration: '2.5s' }}>
-            <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Scroll to Discover</span>
-            <ArrowRight className="rotate-90" size={16} />
+        <div className="relative z-10 flex flex-col items-center px-4 text-center">
+          <ShinyText text="Flowgen" className="text-[clamp(3.5rem,14vw,14rem)] font-black tracking-tighter drop-shadow-[0_0_35px_rgba(255,255,255,0.4)]" />
+          <p className="mt-4 text-xs md:text-sm font-bold uppercase tracking-[0.4em] text-slate-400 max-w-md">
+            Organize content, not files
+          </p>
+          <div className="mt-8 flex items-center gap-4">
+            <button
+              onClick={onStart}
+              className="h-14 px-10 bg-white text-black font-black text-sm rounded-full hover:scale-105 active:scale-95 transition-all shadow-2xl cursor-pointer"
+            >
+              Enter Workspace
+            </button>
+          </div>
+          <div className="mt-12 flex flex-col items-center gap-2 text-white/30 animate-bounce" style={{ animationDuration: '2.5s' }}>
+            <span className="text-[9px] font-bold uppercase tracking-[0.4em]">Scroll to Discover</span>
+            <ArrowRight className="rotate-90" size={14} />
           </div>
         </div>
       </section>

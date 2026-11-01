@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#082f49"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="380" fill="url(#sky)"/>
+  <circle cx="400" cy="280" r="50" fill="#fef08a" opacity="0.9"/>
+  <rect y="360" width="800" height="240" fill="url(#sea)"/>
+  <polygon points="380,360 420,360 480,600 320,600" fill="#78350f"/>
+  <line x1="330" y1="560" x2="470" y2="560" stroke="#451a03" stroke-width="6"/>
+  <line x1="345" y1="510" x2="455" y2="510" stroke="#451a03" stroke-width="5"/>
+  <line x1="360" y1="460" x2="440" y2="460" stroke="#451a03" stroke-width="4"/>
+  <line x1="370" y1="410" x2="430" y2="410" stroke="#451a03" stroke-width="3"/>
+  <line x1="330" y1="560" x2="330" y2="600" stroke="#292524" stroke-width="8"/>
+  <line x1="470" y1="560" x2="470" y2="600" stroke="#292524" stroke-width="8"/>
+</svg>

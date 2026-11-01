@@ -13,6 +13,14 @@ import QuickAddModal from './components/QuickAddModal';
 import AuthPage from './components/AuthPage';
 import StageStats from './components/StageStats';
 import SelectDropdown from './components/SelectDropdown';
+import TutorialGuide from './components/TutorialGuide';
+import Folder from './components/Folder';
+
+const FOLDER_DEMO_ITEMS = [
+  { title: 'Brand guidelines' },
+  { title: 'Launch plan' },
+  { image: '/photos/pier.jpg', title: 'The pier' }
+];
 import { auth, onAuthStateChanged, signOut, db, GoogleAuthProvider, signInWithPopup } from './firebase';
 import { uploadToDrive, downloadZip, getOrCreateFolder } from './driveUtils';
 import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
@@ -80,23 +88,25 @@ import DetailPanel from './components/ProjectDetailPanel';
 const DroppableColumn = ({ id, config, projects, onProjectClick }) => {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
-    <div className="flex-shrink-0 w-[280px] sm:w-[320px] md:w-[340px] flex flex-col h-full pb-10">
-      <div className="flex items-center justify-between mb-6 px-3">
+    <div className="flex-shrink-0 w-[280px] sm:w-[320px] md:w-[340px] flex flex-col h-full">
+      <div className="flex items-center justify-between mb-4 px-3 flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: config.color }} />
           <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white/40">{config.label}</h3>
         </div>
-        <span className="text-[10px] font-black text-slate-600 bg-white/5 px-3 py-1 rounded-full border border-white/5">
+        <span className="text-[10px] font-black text-slate-500 bg-white/5 px-3 py-1 rounded-full border border-white/5">
           {projects.length}
         </span>
       </div>
       <div
         ref={setNodeRef}
-        className={`flex-1 border rounded-[40px] p-4 overflow-y-auto scrollbar-hide flex flex-col shadow-inner transition-all duration-200 ${
+        className={`flex-1 border rounded-[32px] p-3 sm:p-4 overflow-y-auto custom-scroll flex flex-col shadow-inner transition-all duration-200 ${
           isOver ? 'bg-violet-500/5 border-violet-500/40' : 'bg-white/[0.015] border-white/[0.04]'
         }`}
       >
-        {projects.map((p) => <DraggableItem key={p.id} project={p} onClick={onProjectClick} />)}
+        <div className="flex flex-col gap-3 pb-6 flex-1">
+          {projects.map((p) => <DraggableItem key={p.id} project={p} onClick={onProjectClick} />)}
+        </div>
       </div>
     </div>
   );
@@ -140,7 +150,49 @@ export default function App() {
   const [downloading, setDownloading] = useState(false);
   const [saveStatus, setSaveStatus] = useState("idle");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [tutorialStep, setTutorialStep] = useState(0); // 0: inactive, 1: welcome, 2: point to create, 3: in modal, 4: celebration
+  const [createdProjectTitle, setCreatedProjectTitle] = useState('');
+  const [fileViewMode, setFileViewMode] = useState('cards'); // 'cards' | 'folders'
   const saveTimeouts = useRef({});
+
+  // ── First-Time User Tutorial Guide Trigger ──────────────────────────────
+  useEffect(() => {
+    if (!authLoading && user && view !== 'landing' && view !== 'auth') {
+      const tutorialKey = `flowgen_tutorial_completed_${user.uid}`;
+      const hasCompleted = localStorage.getItem(tutorialKey) === 'true';
+
+      // If user already has projects in their workspace, mark completed immediately
+      if (projects.length > 0) {
+        if (!hasCompleted) {
+          try { localStorage.setItem(tutorialKey, 'true'); } catch { /* ignore */ }
+        }
+        if (tutorialStep !== 0 && tutorialStep !== 4) {
+          setTutorialStep(0);
+        }
+      } else if (!hasCompleted && tutorialStep === 0) {
+        // User logged in with 0 projects and never completed tutorial
+        setTutorialStep(1);
+      }
+    }
+  }, [authLoading, user, view, projects.length, tutorialStep]);
+
+  const handleStartGuide = () => {
+    setTutorialStep(2);
+  };
+
+  const handleOpenCreateFromGuide = () => {
+    setIsQuickAddOpen(true);
+    setTutorialStep(3);
+  };
+
+  const completeTutorial = () => {
+    if (user?.uid) {
+      try {
+        localStorage.setItem(`flowgen_tutorial_completed_${user.uid}`, 'true');
+      } catch { /* ignore */ }
+    }
+    setTutorialStep(0);
+  };
 
   // ── Persistence effects ───────────────────────────────────────────────────
   useEffect(() => {
@@ -222,6 +274,7 @@ export default function App() {
   const handleLogout = async () => {
     await signOut(auth);
     setUser(null);
+    setTutorialStep(0);
     setView('landing');
   };
 
@@ -284,8 +337,12 @@ export default function App() {
   useEffect(() => {
     if (window.ogl) { setIsLibReady(true); return; }
     const script = document.createElement('script');
-    script.src = 'https://unpkg.com/ogl';
+    script.src = 'https://cdn.jsdelivr.net/npm/ogl/dist/ogl.umd.js';
     script.onload = () => setIsLibReady(true);
+    script.onerror = () => {
+      console.warn('[Flowgen] Could not load OGL shader library, falling back to CSS effects.');
+      setIsLibReady(false);
+    };
     document.body.appendChild(script);
   }, []);
 
@@ -315,6 +372,15 @@ export default function App() {
     else result.sort((a, b) => b.id - a.id);
     return result;
   }, [projects, searchQuery, statusFilter, sortBy]);
+
+  const projectFolderItems = useMemo(() => {
+    if (filteredProjects.length === 0) return FOLDER_DEMO_ITEMS;
+    return filteredProjects.slice(0, 6).map(p => ({
+      title: p.title || 'Untitled Project',
+      description: `${p.status} • ${p.assets?.length || 0} clips`,
+      image: p.thumbnail || (p.assets && p.assets[0]?.preview) || undefined,
+    }));
+  }, [filteredProjects]);
 
   /* Resume working list */
   const resumeProjects = useMemo(() => {
@@ -515,6 +581,12 @@ export default function App() {
     setIsQuickAddOpen(false);
     setSelectedId(newItem.id);
     triggerFirestoreSave(newItem);
+
+    // If tutorial was active, advance to celebration milestone
+    if (tutorialStep > 0) {
+      setCreatedProjectTitle(title);
+      setTutorialStep(4);
+    }
   };
 
   /* ─── Render ─── */
@@ -645,7 +717,12 @@ export default function App() {
 
           {view === 'landing' && (
             <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 w-full">
-              <Landing onStart={() => user ? setView('pipeline') : setView('auth')} isLibReady={isLibReady} />
+              <Landing
+                onStart={() => user ? setView('pipeline') : setView('auth')}
+                onLogin={() => setView('auth')}
+                user={user}
+                isLibReady={isLibReady}
+              />
             </motion.div>
           )}
 
@@ -685,17 +762,44 @@ export default function App() {
               {/* Stage Analytics */}
               <StageStats projects={projects} />
 
-              <div className="flex items-center gap-3 mb-6">
-                <Layers size={16} className="text-slate-500" />
-                <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-500">All Files</h3>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <Layers size={16} className="text-slate-500" />
+                  <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-500">All Files</h3>
+                </div>
+                <div className="flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs">
+                  <button
+                    onClick={() => setFileViewMode('cards')}
+                    className={`px-3 py-1 rounded-lg font-bold transition-colors cursor-pointer ${
+                      fileViewMode === 'cards' ? 'bg-white text-black' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Cards
+                  </button>
+                  <button
+                    onClick={() => setFileViewMode('folders')}
+                    className={`px-3 py-1 rounded-lg font-bold transition-colors cursor-pointer ${
+                      fileViewMode === 'folders' ? 'bg-white text-black' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    Folders
+                  </button>
+                </div>
               </div>
 
               {filteredProjects.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col items-center justify-center py-24 text-center"
+                  className="flex flex-col items-center justify-center py-16 text-center"
                 >
-                  <div className="text-6xl mb-5">✦</div>
+                  <div className="mb-8 flex items-center justify-center">
+                    <Folder
+                      label="Projects"
+                      items={FOLDER_DEMO_ITEMS}
+                      onItemClick={(item, index) => console.log(item, index)}
+                    />
+                  </div>
+
                   <p className="text-lg font-black text-white mb-2">
                     {searchQuery || statusFilter !== 'ALL' ? 'No matches found' : 'Nothing here yet'}
                   </p>
@@ -707,13 +811,32 @@ export default function App() {
                   {!searchQuery && statusFilter === 'ALL' && (
                     <motion.button
                       whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                      onClick={() => setIsQuickAddOpen(true)}
-                      className="flex items-center gap-2.5 px-8 py-4 bg-white text-black font-black text-sm rounded-full shadow-xl"
+                      onClick={() => {
+                        setIsQuickAddOpen(true);
+                        if (tutorialStep === 2) setTutorialStep(3);
+                      }}
+                      className={`flex items-center gap-2.5 px-8 py-4 bg-white text-black font-black text-sm rounded-full shadow-xl ${
+                        tutorialStep === 2 ? 'ring-4 ring-violet-500 ring-offset-4 ring-offset-black animate-pulse' : ''
+                      }`}
                     >
                       <Plus size={18} strokeWidth={3} /> Create your first content idea
                     </motion.button>
                   )}
                 </motion.div>
+              ) : fileViewMode === 'folders' ? (
+                <div className="flex items-center justify-center py-12 px-6 rounded-3xl bg-white/[0.02] border border-white/5 backdrop-blur-md">
+                  <div className="flex flex-col items-center">
+                    <Folder
+                      label="Projects"
+                      items={projectFolderItems}
+                      onItemClick={(item, index) => {
+                        const p = filteredProjects[index];
+                        if (p) setSelectedId(p.id);
+                      }}
+                    />
+                    <span className="mt-3 text-[11px] font-mono text-slate-400">Click to open flap • {filteredProjects.length} projects</span>
+                  </div>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {filteredProjects.map(p => <ProjectCard key={p.id} project={p} onClick={p => setSelectedId(p.id)} />)}
@@ -723,7 +846,7 @@ export default function App() {
           )}
 
           {view === 'pipeline' && (
-            <motion.div key="pipeline" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 min-h-0 flex gap-4 md:gap-8 p-4 md:p-10 overflow-x-auto bg-black/10 pipeline-scroll h-full transform-gpu will-change-transform">
+            <motion.div key="pipeline" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 min-h-0 flex gap-4 md:gap-8 px-4 md:px-10 pt-2 pb-5 overflow-x-auto bg-black/10 pipeline-scroll h-full transform-gpu will-change-transform">
               {projects.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
@@ -734,8 +857,13 @@ export default function App() {
                   <p className="text-sm text-slate-500 max-w-xs mb-8">Add your first content idea and it will appear as a card here.</p>
                   <motion.button
                     whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                    onClick={() => setIsQuickAddOpen(true)}
-                    className="flex items-center gap-2.5 px-8 py-4 bg-white text-black font-black text-sm rounded-full shadow-xl"
+                    onClick={() => {
+                      setIsQuickAddOpen(true);
+                      if (tutorialStep === 2) setTutorialStep(3);
+                    }}
+                    className={`flex items-center gap-2.5 px-8 py-4 bg-white text-black font-black text-sm rounded-full shadow-xl ${
+                      tutorialStep === 2 ? 'ring-4 ring-violet-500 ring-offset-4 ring-offset-black animate-pulse' : ''
+                    }`}
                   >
                     <Plus size={18} strokeWidth={3} /> Create your first content idea
                   </motion.button>
@@ -763,8 +891,13 @@ export default function App() {
         {/* Quick Add Button */}
         {view !== 'landing' && view !== 'auth' && (
           <motion.button whileHover={{ scale: 1.1, rotate: 90 }} whileTap={{ scale: 0.9 }}
-            onClick={() => setIsQuickAddOpen(true)}
-            className="fixed bottom-6 right-6 md:bottom-12 md:right-12 w-14 h-14 md:w-20 md:h-20 bg-white text-black rounded-full shadow-2xl flex items-center justify-center z-[150] hover:shadow-violet-500/20 transition-shadow"
+            onClick={() => {
+              setIsQuickAddOpen(true);
+              if (tutorialStep === 2) setTutorialStep(3);
+            }}
+            className={`fixed bottom-6 right-6 md:bottom-12 md:right-12 w-14 h-14 md:w-20 md:h-20 bg-white text-black rounded-full shadow-2xl flex items-center justify-center z-[150] hover:shadow-violet-500/20 transition-shadow ${
+              tutorialStep === 2 ? 'ring-4 ring-violet-500 ring-offset-4 ring-offset-black animate-bounce' : ''
+            }`}
           >
             <Plus size={28} strokeWidth={3} className="md:hidden" />
             <Plus size={40} strokeWidth={3} className="hidden md:block" />
@@ -772,8 +905,27 @@ export default function App() {
         )}
       </main>
 
+      {/* First-Time User Tutorial Guide */}
+      <TutorialGuide
+        step={tutorialStep}
+        user={user}
+        onStartGuide={handleStartGuide}
+        onOpenCreate={handleOpenCreateFromGuide}
+        onSkip={completeTutorial}
+        onComplete={completeTutorial}
+        createdProjectTitle={createdProjectTitle}
+      />
+
       {/* Quick Add Modal */}
-      <QuickAddModal isOpen={isQuickAddOpen} onClose={() => setIsQuickAddOpen(false)} onAdd={handleAddProject} />
+      <QuickAddModal 
+        isOpen={isQuickAddOpen} 
+        onClose={() => {
+          setIsQuickAddOpen(false);
+          if (tutorialStep === 3) setTutorialStep(2);
+        }} 
+        onAdd={handleAddProject} 
+        isTutorialMode={tutorialStep === 3}
+      />
 
       {/* Detail Panel */}
       <AnimatePresence>

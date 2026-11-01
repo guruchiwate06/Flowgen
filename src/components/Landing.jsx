@@ -137,19 +137,19 @@ export default function Landing({ onStart, onLogin, user }) {
               backgroundColor="#0A0A0B"
               speed={0.3}
               streakCount={2}
-              streakWidth={0.5}
+              streakWidth={0.6}
               twinkle={1}
-              backgroundGlow={0}
-              headGlow={0.25}
-              bloom={0.5}
+              backgroundGlow={0.15}
+              headGlow={0.35}
+              bloom={0.6}
               mouseInteraction={true}
               holdToWarp={true}
               intro={true}
-              streakLength={1.5}
-              glow={1.7}
+              streakLength={1.8}
+              glow={1.8}
               depth={0.6}
-              zoom={2.7}
-              opacity={0.65}
+              zoom={2.2}
+              opacity={0.7}
               mouseStrength={0.2}
               mouseRadius={0.15}
               lens={0.15}
@@ -159,21 +159,24 @@ export default function Landing({ onStart, onLogin, user }) {
 
         {/* Foreground Content: Sitting cleanly on layer z-20 with ShinyText */}
         <div className="relative z-20 isolate flex flex-col items-center px-4 text-center select-none pointer-events-auto">
+          {/* Subtle violet ambient glow behind title for mobile depth */}
+          <div className="absolute w-[240px] h-[240px] sm:w-[460px] sm:h-[460px] rounded-full bg-violet-600/20 blur-[80px] sm:blur-[130px] pointer-events-none -z-10" />
+
           <ShinyText 
             text="Flowgen" 
-            className="text-[clamp(2.75rem,13vw,16rem)] font-black tracking-tighter drop-shadow-[0_0_35px_rgba(255,255,255,0.4)]" 
+            className="text-6xl sm:text-8xl md:text-9xl lg:text-[14rem] font-black tracking-tight sm:tracking-tighter drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]" 
           />
           
-          <p className="mt-3 sm:mt-4 text-[11px] sm:text-xs md:text-sm font-bold uppercase tracking-[0.25em] sm:tracking-[0.4em] text-slate-400">
+          <p className="mt-3 sm:mt-5 text-xs sm:text-sm md:text-base font-bold uppercase tracking-[0.25em] sm:tracking-[0.4em] text-slate-300">
             Organize content, not files
           </p>
           
           <div 
             onClick={() => scrollToSection('hero-slogan')} 
-            className="mt-8 sm:mt-12 flex flex-col items-center gap-2 text-white/40 hover:text-white/80 transition-colors cursor-pointer animate-bounce" 
+            className="mt-8 sm:mt-12 flex flex-col items-center gap-2 text-white/50 hover:text-white/90 transition-colors cursor-pointer animate-bounce" 
             style={{ animationDuration: '2.5s' }}
           >
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em]">Scroll to Discover</span>
+            <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.25em] sm:tracking-[0.4em]">Scroll to Discover</span>
             <ArrowRight className="rotate-90" size={15} />
           </div>
         </div>
@@ -733,7 +736,7 @@ export default function Landing({ onStart, onLogin, user }) {
 
       {/* ── FLOATING NAVIGATION DOCK / UNROLLING BAR ── */}
       <div 
-        className={`fixed bottom-4 sm:bottom-6 inset-x-0 z-[100] pointer-events-none px-3 sm:px-6 flex ${
+        className={`fixed bottom-6 sm:bottom-8 inset-x-0 z-[100] pointer-events-none px-4 sm:px-6 flex ${
           isCollapsed ? 'justify-start' : 'justify-center'
         }`}
       >
@@ -747,7 +750,7 @@ export default function Landing({ onStart, onLogin, user }) {
             mass: 0.4
           }}
           style={{ willChange: 'transform' }}
-          className="pointer-events-auto max-w-[calc(100vw-24px)]"
+          className="pointer-events-auto max-w-[calc(100vw-32px)]"
         >
           <BorderGlow
             borderRadius={999}
@@ -758,9 +761,9 @@ export default function Landing({ onStart, onLogin, user }) {
             glowColor="268 80 75"
             backgroundColor="#121215"
             colors={['#6C5CE7', '#a78bfa', '#38bdf8']}
-            className="shadow-xl backdrop-blur-md"
+            className="shadow-2xl backdrop-blur-md"
           >
-            <div className="flex items-center p-1 sm:p-2">
+            <div className="flex items-center p-1.5 sm:p-2">
               
               {/* The Flowgen Logo Button (clean icon always at anchor position) */}
               <button
@@ -776,8 +779,8 @@ export default function Landing({ onStart, onLogin, user }) {
                 title={isCollapsed ? "Open navigation menu" : isScrolled ? "Collapse to icon" : "Scroll to top"}
                 className="flex items-center justify-center p-1 rounded-full hover:scale-105 active:scale-95 transition-transform cursor-pointer flex-shrink-0"
               >
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center shadow">
-                  <Layers size={14} className="text-black" />
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow">
+                  <Layers size={15} className="text-black" />
                 </div>
               </button>
 
@@ -785,7 +788,7 @@ export default function Landing({ onStart, onLogin, user }) {
               <motion.div
                 initial={false}
                 animate={{
-                  maxWidth: isCollapsed ? 0 : 420,
+                  maxWidth: isCollapsed ? 0 : 440,
                   opacity: isCollapsed ? 0 : 1,
                 }}
                 transition={{
@@ -794,30 +797,21 @@ export default function Landing({ onStart, onLogin, user }) {
                 }}
                 className="overflow-hidden flex items-center"
               >
-                <div className="flex items-center gap-1.5 sm:gap-4 pl-1.5 sm:pl-2 pr-1 whitespace-nowrap">
-                  <span className="text-xs sm:text-sm font-bold text-white tracking-tight hidden md:inline">
+                <div className="flex items-center gap-2 sm:gap-4 pl-2 pr-1 whitespace-nowrap">
+                  <span className="text-xs sm:text-sm font-bold text-white tracking-tight hidden sm:inline">
                     Flowgen
                   </span>
 
-                  <div className="h-4 w-[1px] bg-white/10 hidden md:block flex-shrink-0" />
+                  <div className="h-4 w-[1px] bg-white/10 hidden sm:block flex-shrink-0" />
 
                   {/* Navigation anchors */}
-                  <div className="flex items-center gap-0.5 text-[10px] sm:text-[11px] font-medium text-slate-400">
-                    <button
-                      onClick={() => {
-                        scrollToSection('hero-slogan');
-                        if (isScrolled) setIsNavExpanded(false);
-                      }}
-                      className="px-2 sm:px-2.5 py-1 rounded-full hover:text-white transition-colors cursor-pointer"
-                    >
-                      Intro
-                    </button>
+                  <div className="flex items-center gap-1 text-[11px] sm:text-xs font-medium text-slate-400">
                     <button
                       onClick={() => {
                         scrollToSection('whats-inside');
                         if (isScrolled) setIsNavExpanded(false);
                       }}
-                      className="px-2 sm:px-2.5 py-1 rounded-full hover:text-white transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-full hover:text-white transition-colors cursor-pointer text-slate-300"
                     >
                       Features
                     </button>
@@ -826,7 +820,7 @@ export default function Landing({ onStart, onLogin, user }) {
                         scrollToSection('workflow-section');
                         if (isScrolled) setIsNavExpanded(false);
                       }}
-                      className="px-2 sm:px-2.5 py-1 rounded-full hover:text-white transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-full hover:text-white transition-colors cursor-pointer text-slate-300"
                     >
                       Workflow
                     </button>
@@ -837,10 +831,10 @@ export default function Landing({ onStart, onLogin, user }) {
                   {/* Action button */}
                   <button
                     onClick={onStart}
-                    className="h-7 sm:h-8 px-3 sm:px-4 bg-white text-black font-bold text-[11px] sm:text-xs rounded-full hover:scale-105 active:scale-95 transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap shadow-sm flex-shrink-0"
+                    className="h-8 px-3.5 sm:px-4 bg-white text-black font-bold text-xs rounded-full hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shadow-sm flex-shrink-0"
                   >
                     <span>{user ? 'Studio' : 'Open'}</span>
-                    <ArrowRight size={11} />
+                    <ArrowRight size={12} />
                   </button>
                 </div>
               </motion.div>
